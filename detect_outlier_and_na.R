@@ -1,4 +1,4 @@
-detect_outlier_and_na <- function(vector, return_if_none){
+detect_outlier_and_na <- function(vector, return_if_none = NULL){
   sd <- sd(vector)
   mean <- mean(vector)
   upper_sd <- mean + 3*sd
@@ -10,6 +10,5 @@ detect_outlier_and_na <- function(vector, return_if_none){
     return(mark)
   }else{
     return(return_if_none)
-    }
-
+  }
 }
