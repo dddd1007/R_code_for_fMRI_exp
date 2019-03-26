@@ -2,8 +2,6 @@
 calc_simon_effect <- function(data = NA, exclude_outlier = T){
   
   # extract the data when the sub hit the right button
-  data <- data %>% 
-    filter(Type == 1)
   
   if(exclude_outlier){ 
     
