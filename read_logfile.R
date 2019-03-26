@@ -82,6 +82,8 @@ read_logfile_to_dataframe <- function(logfile = NA, end_code = "jitter") {
   result_table$Time <- result_table$Time - as.numeric(as.character(zero_onset))
   result <- mutate(result_table, onset = Time / 20000)
   
+  result <- cbind(result, filename = logfile)
+  
   #time_stamp <- str_split(temp_text_file[time_stamp], "\"")[[1]][[4]] %>% 
   #  as.POSIXct() %>% 
   #  as.numeric()
