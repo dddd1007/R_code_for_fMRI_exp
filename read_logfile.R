@@ -2,7 +2,7 @@
 # 由于在这次实验中, 我们重复使用了多个scenario, 且各自独立获取. 因此我们排序的
 # 依据, 便包括了被试编号及记录时间. 即记录时间较早的为较早的run.
 
-read_logfile_to_dataframe <- function(logfile = NA, end_code = "break_message") {
+read_logfile_to_dataframe <- function(logfile = NA, end_code = "jitter") {
   if (is.na(logfile)) {
     logfile <- file.choose()
   }

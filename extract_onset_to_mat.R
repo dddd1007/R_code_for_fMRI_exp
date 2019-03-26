@@ -39,7 +39,7 @@ mutate_outlier <- function(x) {
 extract_onset <- function(logdata_frame){
   logdata_frame %>% 
     filter(Type == "hit" | Type == "miss" | Type == "incorrect") %>% 
-    select(final_code, onset, Type, RT, CPE) -> foo
+    select(final_code, onset, Type, RT) -> foo
   
   if (nrow(filter(foo, Type == "hit")) >0) {
     foo %>% 
@@ -76,15 +76,15 @@ extract_onset <- function(logdata_frame){
   total_list[[1]] <- bar %>% 
     select(final_code, onset, Num) %>% 
     spread(final_code, onset, fill = NA)
-  total_list[[2]] <- bar %>% 
-    select(final_code, CPE, Num) %>% 
-    spread(final_code, CPE, fill = NA)
+  #total_list[[2]] <- bar %>% 
+   # select(final_code, Num) %>% 
+   # spread(final_code, fill = NA)
   
   return(total_list)
 }
 
 # 读取相应的被试数据并生成对应的 mat 文件的函数
-extract_onset_to_mat <- function(sub_num = "sub01", logfile_dir, mat_dir, pe_dir, total_nscan = 1088){
+extract_onset_to_mat <- function(sub_num = "sub01", logfile_dir, mat_dir){
   
   log_filenames <- dir(logfile_dir,full.names = T)
   log_filenames <- log_filenames[str_detect(log_filenames, "log")] %>% 
@@ -95,7 +95,7 @@ extract_onset_to_mat <- function(sub_num = "sub01", logfile_dir, mat_dir, pe_dir
   all_log_list <- list()
   j = 1
   for (i in focus_log) {
-    all_log_list[[j]] <- read_logfile_to_dataframe(i)
+    all_log_list[[j]] <- read_logfile_to_dataframe(i, end_code = "jitter")
     j = j + 1
   }
   
@@ -131,7 +131,7 @@ extract_onset_to_mat <- function(sub_num = "sub01", logfile_dir, mat_dir, pe_dir
   volatility_session_num <- unique(volatility_data$session)
   volatility_session <- paste0("session", volatility_session_num)
   volatility_list <- rbind(volatility_session_num, volatility_session, 
-                           condition_name = c("v1", "v2", "v3", "v4"))
+                           condition_name = c("v1", "v2", "v3"))
   
 
     for (i in 1:length(volatility_session_num)) {
@@ -140,16 +140,17 @@ extract_onset_to_mat <- function(sub_num = "sub01", logfile_dir, mat_dir, pe_dir
 
         extract_onset(bar) -> foo
       assign(volatility_list[3,i], foo[[1]])
-      assign(paste0(volatility_list[3,i], "_PE"), foo[[2]])
+      #assign(paste0(volatility_list[3,i], "_PE"), foo[[2]])
     }
 
     ## 稳定条件
-    s_20_data <- filter(sub_data, logfile_name == "s_20")
-    s_80_data <- filter(sub_data, logfile_name == "s_80")
-    stable_session_num <- unique(c(s_20_data$session, s_80_data$session))
+    s_part1 <- filter(sub_data, stringr::str_detect(logfile_name, "s._part1"))
+    s_part2 <- filter(sub_data, stringr::str_detect(logfile_name, "s._part2"))
+    s_part3 <- filter(sub_data, stringr::str_detect(logfile_name, "s._part3"))
+    stable_session_num <- unique(c(s_part1$session, s_part2$session, s_part3$session))
     stable_session <- paste0("session", stable_session_num)
     stable_list <- rbind(stable_session_num, stable_session, 
-                         condition_name = c("s_20_1", "s_20_2", "s_80_1", "s_80_2"))
+                         condition_name = c("s_part1", "s_part2", "s_part3"))
   
     for (i in 1:length(stable_session_num)) {
       sub_data %>% 
@@ -159,18 +160,17 @@ extract_onset_to_mat <- function(sub_num = "sub01", logfile_dir, mat_dir, pe_dir
       }
       extract_onset(bar) -> foo
       assign(stable_list[3,i], foo[[1]])
-      assign(paste0(stable_list[3,i], "_PE"), foo[[2]])
+      #assign(paste0(stable_list[3,i], "_PE"), foo[[2]])
     }
     
     session_table <- cbind(volatility_list, stable_list)
-    onset_table <- cbind(v1, v2, v3, v4,s_20_1, s_20_2, s_80_1, s_80_2)
-    PE_table <- cbind(v1_PE, v2_PE, v3_PE, v4_PE, s_20_1_PE, s_20_2_PE, s_80_1_PE, s_80_2_PE)
+    onset_table <- cbind(v1, v2, v3, s_part1, s_part2, s_part3)
     
     print("Writing the MAT file.")
     print("Writing the MAT file..")
     print("Writing the MAT file...")
     R.matlab::writeMat(paste0(mat_dir,"/",sub_num,"_onset.MAT"), session = session_table, 
-                       v1 = v1, v2 = v2, v3 = v3, s_part1 = s_20_1, s_part2 = s_20_2, s_part3 = s_80_1)
+                       v1 = v1, v2 = v2, v3 = v3, s_part1 = s_part1, s_part2 = s_part2, s_part3 = s_part3)
     print("Done.")
     print(paste0("MAT file location: ", " ", paste0(mat_dir,"/",sub_num,"_onset.MAT")))
 
