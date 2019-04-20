@@ -2,11 +2,12 @@
 # 由于在这次实验中, 我们重复使用了多个scenario, 且各自独立获取. 因此我们排序的
 # 依据, 便包括了被试编号及记录时间. 即记录时间较早的为较早的run.
 
-read_logfile_to_dataframe <- function(logfile = NA, end_code = "jitter") {
+read_logfile <- function(logfile = NA, end_code = "jitter") {
   if (is.na(logfile)) {
     logfile <- file.choose()
   }
   
+  source("check_first_onset.R")
   temp_text_file <- readLines(logfile)
   
   index_message <- which(stringr::str_detect(temp_text_file, "Subject"))[[1]]
@@ -29,10 +30,20 @@ read_logfile_to_dataframe <- function(logfile = NA, end_code = "jitter") {
     lubridate::mdy_hms() %>% 
     as.numeric()
   
+  # calc the onset / TR
+  # I found that sometime I press the reset butten before running the experiment programme,
+  # it may cause the first zero onset is not the real one.
+  # so I need to fix it.
+  
+  if(check_first_onset(logfile)){
+    zero_onset_loc <- 1
+  }else{
+    zero_onset_loc <- 2
+  }
   zero_onset <- read.delim(textConnection(temp_text_file[(index_message):(end_message+2)]), sep = "\t") %>% 
     filter(Code == 30, Trial == 0)  %>% 
     .$Time %>% 
-    .[length(.)]
+    .[zero_onset_loc]
   
   RT_table$RT <- RT_table$RT / 10
   
