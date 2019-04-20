@@ -7,7 +7,6 @@ read_logfile <- function(logfile = NA, end_code = "jitter") {
     logfile <- file.choose()
   }
   
-  source("check_first_onset.R")
   temp_text_file <- readLines(logfile)
   
   index_message <- which(stringr::str_detect(temp_text_file, "Subject"))[[1]]

@@ -95,7 +95,7 @@ extract_onset_to_mat <- function(sub_num = "sub01", logfile_dir, mat_dir){
   all_log_list <- list()
   j = 1
   for (i in focus_log) {
-    all_log_list[[j]] <- read_logfile_to_dataframe(i, end_code = "jitter")
+    all_log_list[[j]] <- read_logfile(i, end_code = "jitter")
     j = j + 1
   }
   
